@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fashion Radar</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#141414">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fashion Radar">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#ffffff;
+    --ink:#141414;
+    --ink-soft:#5c5a55;
+    --line:#e2ded4;
+    --red:#c81e3a;
+    --card:#faf9f6;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+
+  /* ---------- Masthead ---------- */
+  .masthead{
+    border-bottom:2px solid var(--ink);
+    padding:28px 28px 18px;
+  }
+  .masthead-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .wordmark{
+    font-family:'Bodoni Moda',serif;
+    font-size:44px;
+    font-weight:500;
+    letter-spacing:-0.5px;
+    line-height:1;
+    margin:0;
+  }
+  .wordmark em{
+    font-style:italic;
+    color:var(--red);
+  }
+  .masthead-meta{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    text-align:right;
+    line-height:1.6;
+  }
+  .tagline{
+    font-size:14px;
+    color:var(--ink-soft);
+    margin-top:8px;
+    max-width:520px;
+  }
+
+  /* ---------- Controls ---------- */
+  .controls{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    padding:18px 28px;
+    border-bottom:1px solid var(--line);
+    flex-wrap:wrap;
+  }
+  .tabs{
+    display:flex;
+    gap:2px;
+    border:1px solid var(--ink);
+  }
+  .tab{
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.02em;
+    padding:9px 16px;
+    background:var(--paper);
+    border:none;
+    cursor:pointer;
+    color:var(--ink);
+  }
+  .tab.active{
+    background:var(--ink);
+    color:var(--paper);
+  }
+  .search{
+    flex:1;
+    min-width:180px;
+    border:1px solid var(--line);
+    padding:9px 12px;
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  .search:focus{outline:none;border-color:var(--ink);}
+  .search::placeholder{color:#a8a49a;}
+
+  .refresh-btn{
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    padding:9px 14px;
+    background:var(--ink);
+    color:var(--paper);
+    border:1px solid var(--ink);
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .refresh-btn:hover{background:var(--red);border-color:var(--red);}
+  .refresh-btn:disabled{
+    background:var(--paper);
+    color:var(--ink-soft);
+    border-color:var(--line);
+    cursor:default;
+  }
+  .refresh-status{
+    padding:0 28px 6px;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    min-height:16px;
+  }
+  .refresh-status.error{color:var(--red);}
+
+  /* ---------- Grid ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+    gap:1px;
+    background:var(--line);
+    border-bottom:1px solid var(--line);
+  }
+  .card{
+    background:var(--card);
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    min-height:230px;
+  }
+  .card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+  }
+  .idx{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+  }
+  .tag{
+    font-family:'Space Mono',monospace;
+    font-size:10px;
+    padding:3px 7px;
+    border:1px solid var(--ink);
+  }
+  .tag.runway{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+  .tag.popup{color:var(--red);border-color:var(--red);}
+  .tag.meetup{color:var(--ink-soft);border-color:var(--line);}
+  .tag.collab{background:var(--red);color:var(--paper);border-color:var(--red);}
+
+  .swatch{
+    width:44px;height:44px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Bodoni Moda',serif;
+    font-size:16px;
+    color:#fff;
+    flex-shrink:0;
+  }
+  .name-row{
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+  .name{
+    font-family:'Bodoni Moda',serif;
+    font-size:19px;
+    line-height:1.15;
+    margin:0;
+  }
+  .place{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:2px;
+  }
+  .note{
+    font-size:13px;
+    color:var(--ink-soft);
+    line-height:1.45;
+    flex:1;
+  }
+  .card-bottom{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-top:1px solid var(--line);
+    padding-top:12px;
+  }
+  .date{
+    font-family:'Space Mono',monospace;
+    font-size:11.5px;
+  }
+  .link{
+    font-size:12px;
+    text-decoration:none;
+    border-bottom:1px solid var(--ink);
+    padding-bottom:1px;
+  }
+  .link:hover{color:var(--red);border-color:var(--red);}
+
+  .empty{
+    padding:60px 28px;
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:14px;
+  }
+
+  .footnote{
+    padding:16px 28px 32px;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    line-height:1.6;
+    max-width:640px;
+  }
+  .footnote a{text-decoration:underline;}
+
+  @media(max-width:520px){
+    .wordmark{font-size:34px;}
+    .masthead-meta{text-align:left;}
+    .masthead-row{flex-direction:column;align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="masthead-row">
+    <h1 class="wordmark">Fashion <em>Radar</em></h1>
+    <div class="masthead-meta" id="issueMeta">ISSUE&nbsp;01<br>SEP&nbsp;2026</div>
+  </div>
+  <div class="tagline">Upcoming shows, pop-ups and meetups worldwide — and creatives currently looking for a publication to work with.</div>
+</div>
+
+<div class="controls">
+  <div class="tabs">
+    <button class="tab active" data-tab="events">Events</button>
+    <button class="tab" data-tab="collab">Collaborators</button>
+  </div>
+  <input class="search" id="search" placeholder="Search by name, city or type…">
+  <button class="refresh-btn" id="refreshBtn">Refresh now</button>
+</div>
+<div class="refresh-status" id="refreshStatus"></div>
+
+<div class="grid" id="grid"></div>
+<div class="empty" id="empty" style="display:none;">No matches. Try a different search.</div>
+
+<div class="footnote" id="footnote"></div>
+
+<script>
+// Fallback data, used only if data.json can't be loaded (e.g. no refresh has
+// run yet, or the page is opened directly from disk instead of served).
+const FALLBACK_EVENTS = [
+  {
+    name:"New York Fashion Week",
+    place:"New York, USA",
+    date:"Sep 10–15, 2026",
+    tag:"runway",
+    tagLabel:"Runway",
+    note:"CFDA official calendar, ~70 shows and presentations. Spring/Summer 2027 womenswear opens the season.",
+    link:"https://runwaylive.com/new-york-fashion-week-2026-schedule.html",
+    initial:"NY", color:"#141414"
+  },
+  {
+    name:"Paris Fashion Week — Women's",
+    place:"Paris, France",
+    date:"Sep 28 – Oct 6, 2026",
+    tag:"runway",
+    tagLabel:"Runway",
+    note:"Closes fashion month. ~68 runway shows and 33 presentations on the official calendar.",
+    link:"https://t2online.in/goodlife/fashion-beauty/fashion-week-2026-dates-announced-across-paris--milan--new-york-and-london/2002780",
+    initial:"PA", color:"#c81e3a"
+  }
+];
+
+const FALLBACK_COLLAB = [
+  {
+    name:"Freelance photographer",
+    place:"Berlin, Germany",
+    date:"Sample entry",
+    tag:"collab",
+    tagLabel:"Seeking outlet",
+    note:"This is the format a real post appears in once the daily refresh has run at least once.",
+    link:"#",
+    initial:"FP", color:"#141414"
+  }
+];
+
+let EVENTS = FALLBACK_EVENTS;
+let COLLAB = FALLBACK_COLLAB;
+let activeTab = "events";
+let usingFallback = true;
+let lastGeneratedOn = null;
+
+async function loadData(){
+  try{
+    const res = await fetch('./data.json', {cache:'no-store'});
+    if(!res.ok) throw new Error('no data.json yet');
+    const data = await res.json();
+    EVENTS = data.events || [];
+    COLLAB = data.collaborators || [];
+    usingFallback = false;
+    if(data.generated_on){
+      lastGeneratedOn = data.generated_on;
+      document.getElementById('issueMeta').innerHTML =
+        `UPDATED<br>${data.generated_on}`;
+    }
+  }catch(e){
+    EVENTS = FALLBACK_EVENTS;
+    COLLAB = FALLBACK_COLLAB;
+    usingFallback = true;
+  }
+  render();
+}
+
+function render(){
+  const grid = document.getElementById('grid');
+  const empty = document.getElementById('empty');
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const source = activeTab === 'events' ? EVENTS : COLLAB;
+  const filtered = source.filter(it =>
+    it.name.toLowerCase().includes(q) ||
+    it.place.toLowerCase().includes(q) ||
+    it.tagLabel.toLowerCase().includes(q)
+  );
+
+  grid.innerHTML = '';
+  empty.style.display = filtered.length ? 'none' : 'block';
+
+  filtered.forEach((it, i) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-top">
+        <span class="idx">${String(i+1).padStart(3,'0')}</span>
+        <span class="tag ${it.tag}">${it.tagLabel}</span>
+      </div>
+      <div class="name-row">
+        <div class="swatch" style="background:${it.color}">${it.initial}</div>
+        <div>
+          <p class="name">${it.name}</p>
+          <div class="place">${it.place}</div>
+        </div>
+      </div>
+      <div class="note">${it.note}</div>
+      <div class="card-bottom">
+        <span class="date">${it.date}</span>
+        ${it.link !== '#' ? `<a class="link" href="${it.link}" target="_blank" rel="noopener">View source</a>` : `<span class="link" style="opacity:.4;cursor:default;border-color:var(--line);">Sample</span>`}
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  document.getElementById('footnote').textContent = usingFallback
+    ? "Showing sample data — data.json hasn't been generated yet. Run fetch_data.py once (or wait for the first scheduled run) to populate this with real results."
+    : (activeTab === 'events'
+        ? "Refreshed daily by an automated search. Coverage depends on what's publicly indexed, so treat this as a strong starting point rather than a complete calendar."
+        : "Refreshed daily by an automated search of publicly indexed posts. This tab will surface fewer, less consistent results than Events — most social platforms don't allow open search access.");
+}
+
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    activeTab = btn.dataset.tab;
+    render();
+  });
+});
+document.getElementById('search').addEventListener('input', render);
+
+/* ---------- Manual refresh button ----------
+   Public — anyone who opens this app can click it. It calls a small
+   Cloudflare Worker (see /cloudflare-worker in the project) which is the
+   only thing that holds the GitHub token. The worker enforces a cooldown
+   server-side, so no matter how many people click this, GitHub only ever
+   gets triggered at most once per cooldown window.
+
+   Fill in your deployed worker's URL below after following
+   cloudflare-worker/README.md.
+*/
+const REFRESH_WORKER_URL = "https://fashion-radar-refresh.YOUR-SUBDOMAIN.workers.dev";
+
+function setStatus(msg, isError){
+  const el = document.getElementById('refreshStatus');
+  el.textContent = msg;
+  el.classList.toggle('error', !!isError);
+}
+
+async function pollForUpdate(previousGeneratedOn, attemptsLeft){
+  if(attemptsLeft <= 0){
+    setStatus("Still processing — check back in a minute.");
+    document.getElementById('refreshBtn').disabled = false;
+    return;
+  }
+  setTimeout(async ()=>{
+    try{
+      const res = await fetch('./data.json', {cache:'no-store'});
+      const data = await res.json();
+      if(data.generated_on && data.generated_on !== previousGeneratedOn){
+        await loadData();
+        setStatus("Updated just now.");
+        document.getElementById('refreshBtn').disabled = false;
+        return;
+      }
+    }catch(e){ /* keep polling */ }
+    pollForUpdate(previousGeneratedOn, attemptsLeft - 1);
+  }, 10000);
+}
+
+async function triggerRefresh(){
+  const btn = document.getElementById('refreshBtn');
+  btn.disabled = true;
+  setStatus("Requesting a refresh…");
+
+  try{
+    const res = await fetch(REFRESH_WORKER_URL, { method: 'POST' });
+    const body = await res.json().catch(()=>({}));
+
+    if(res.status === 429 && body.cooldown){
+      setStatus(body.message || "Refreshed recently — try again shortly.", true);
+      btn.disabled = false;
+      return;
+    }
+    if(!res.ok){
+      setStatus(body.message || `Couldn't trigger a refresh (${res.status}).`, true);
+      btn.disabled = false;
+      return;
+    }
+
+    setStatus("Refresh running — this usually takes under a minute…");
+    pollForUpdate(lastGeneratedOn, 8); // ~80s of polling
+  }catch(e){
+    setStatus("Couldn't reach the refresh service. Try again shortly.", true);
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('refreshBtn').addEventListener('click', triggerRefresh);
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./sw.js').catch(()=>{ /* non-critical */ });
+  });
+}
+
+loadData();
+</script>
+</body>
+</html>
